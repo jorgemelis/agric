@@ -3,6 +3,8 @@ ignore/
 ignore
 info/
 info
+out/
+out
 
 # Python
 *.pyc

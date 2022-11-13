@@ -1,4 +1,4 @@
-import os, sys, shutil
+import os, sys, shutil, re
 import openpyxl
 import pandas as pd
 
@@ -9,18 +9,28 @@ def personalidad(beneficiario, info):
     ret = "PF"
     pj_contains = info["pj_contains"]
     pj_ends_with = info["pj_ends_with"]
+    pj_has_word = info["pj_has_word"]
     aer_contains = info["aer_contains"]
+    aer_ends_with = info["aer_ends_with"]
 
     if any(x.lower() in beneficiario.lower() for x in aer_contains):
+        ret = "AER"
+    if any(beneficiario.lower().endswith(x.lower()) for x in aer_ends_with):
         ret = "AER"
     if any(x.lower() in beneficiario.lower() for x in pj_contains):
         ret = "PJ"
     if any(beneficiario.lower().endswith(x.lower()) for x in pj_ends_with):
         ret = "PJ"
+    if any(re.search(rf"\b{x}\b", beneficiario) for x in pj_has_word):
+        ret = "PJ"
     return ret
 
 
 info = inf.get_info()
+pj_ends_with = info["pj_ends_with"]
+for s in pj_ends_with:
+    print("pj_ends_with:", s)
+
 # print(type(info), info)
 # sys.exit()
 
@@ -50,7 +60,7 @@ dfpf = dfin[dfin["Tipo"] == "PF"]
 # string = "herederos"
 # dftmp = dfin[dfin["Beneficiario"].str.contains(string, case=False)]
 
-xlsout = "/Users/jorge/git/agric/data/2021_personas.xlsx"
+xlsout = "/Users/jorge/git/agric/out/2021_personas.xlsx"
 with pd.ExcelWriter(xlsout, engine="xlsxwriter") as writer:
     dfpj.to_excel(writer, sheet_name="PJ", index=False)
     dfaer.to_excel(writer, sheet_name="AER", index=False)
